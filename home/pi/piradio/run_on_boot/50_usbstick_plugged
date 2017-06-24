@@ -1,0 +1,6 @@
+#!/bin/bash
+# this file must be put into the directory /etc/usbmount/mount.d/50_usbstick_plugged
+echo Mountpoint: $UM_MOUNTPOINT Device: $UM_DEVICE >> /home/pi/piradio/logfiles/usbstick.log
+# echo xxx.sh | at now breaks the connection between the calling script and the xxx.sh script
+echo /home/pi/piradio/run_on_boot/usbstick_plugged.sh $UM_MOUNTPOINT | at now
+exit 0

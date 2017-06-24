@@ -1,0 +1,75 @@
+pcmanfm 
+--> startet den Dateimanager
+
+alsamixer
+--> Soundkarte auswaehlen
+
+amixer
+--> Soundkarte von der Console aus einstellen
+
+darksnow
+--> grafische Oberflaeche fuer Config-File
+
+sudo reboot
+
+sudo halt
+
+sudo ps -A
+--> zeige alle Prozesse
+
+kill nnnn
+--> stoppe Prozess nnnn
+
+sudo killall darkice
+--> stoppe alle Prozesse, die 'darkice' heissen
+
+arecord -f cd -d 0 -vv /dev/null
+--> vu-meter auf der Konsole
+
+arecord -D plughw:1,0 /dev/null -V stereo -c 2 -f cd /dev/null
+--> stereo-vu-meter auf der Konsole
+
+tail -f ~/piradio/logfiles/stream_output.txt
+--> gib live die letzten Zeilen des Logfiles aus
+
+arecord -D plughw:1,0 -f S16_LE | aplay -D hw:0,0
+--> schicke Plug-Mikro auf die interne Lautsprecherbuchse
+oder: arecord -D dsnoop:1 -r 48000 -f S16_LE | aplay -D hw:0,0
+
+arecord -D dsnoop:1 -V mono -f S16_LE -r 48000 /dev/null
+--> schicke das Mikro auf ein VU-Meter auf den Konsole
+
+Einstellungen für Darkice (abgezweigter Audiokanal):
+[input]
+device          = plug:dsnoop:1
+
+
+Besser .asoundrc einstellen, dann kann auf die Soundkarte in verschiedenen Samplingraten zugegriffen werden:
+# allows multiple programs to capture simultaneously
+pcm.dsnooper {
+    type dsnoop			# Direct snoop
+    ipc_key 2048		# unique IPC key
+    ipc_perm 0666 		# IPC permissions (octal, default 0600)
+    slave.pcm "hw:0"		# slave PCM name (string), Reihenfolge gemaess $ cat /proc/asound/pcm
+    slave 			# Slave definition
+    {
+        period_time 0		# in usec	
+        period_size 1024	# in bytes
+        buffer_size 4096	# in bytes
+        channels 2 
+    }
+    hint
+    {
+	show on			# show Device description in e.g. arecord -L
+	description "virtelles Device von hw:0"
+    }
+    bindings {			# note: this is client independent!!!
+        0 0			# maps slave channel to client channel N
+        1 1			# maps slave channel to client channel N
+    }
+}
+
+--> arecord -D plug:dsnooper -V stereo -f S32_LE -r 48000 -c 2 | aplay -D hw:0
+--> arecord -D plug:dsnooper -V stereo -f S16_LE -r 8000 /dev/null
+
+
